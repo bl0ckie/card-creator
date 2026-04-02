@@ -820,7 +820,7 @@ function renderCrewCard() {
   <!-- Art area (transparent) -->
   <rect x="${INNER_X}" y="${ART_Y}" width="${INNER_W}" height="${ART_H}" fill="none" stroke="#2a2a2a" stroke-width="1"/>
   <text x="${CX}" y="${ART_Y + ART_H / 2 + 4}" text-anchor="middle"
-    font-family="'Courier New', monospace" font-size="10" fill="#2a2a2a" letter-spacing="1">ART</text>
+    font-family="'Courier New', monospace" font-size="10" fill="#2a2a2a" letter-spacing="1"></text>
 
   <!-- Stats -->
   <rect x="${INNER_X}" y="${STATS_Y}" width="${INNER_W / 2 - 2}" height="${STATS_H}" fill="#111"/>
@@ -866,10 +866,6 @@ function renderGearCard() {
   <text x="${INNER_X + INNER_W / 2}" y="${INNER_Y + 20}" text-anchor="middle"
     font-family="'Courier New', monospace" font-size="15" font-weight="bold"
     letter-spacing="3" fill="#333">${name.toUpperCase()}</text>
-  <text x="${INNER_X + INNER_W / 2}" y="${HALF_Y - 14}" text-anchor="middle"
-    font-family="'Courier New', monospace" font-size="8" fill="#2a2a2a" letter-spacing="2">
-    ── HIDDEN UNDER CREW ──
-  </text>
 
   <!-- Divider line -->
   <line x1="${INNER_X}" y1="${HALF_Y}" x2="${INNER_X + INNER_W}" y2="${HALF_Y}" stroke="#333" stroke-width="2" stroke-dasharray="4,4"/>
@@ -897,12 +893,7 @@ function renderGearCard() {
   <!-- Specialty bonus -->
   ${specBonus !== 'none' ? `
     ${specSymbolSVG(specBonus, INNER_X + INNER_W / 2, HALF_Y + 70, 28)}
-    <text x="${INNER_X + INNER_W / 2}" y="${HALF_Y + 88}" text-anchor="middle"
-      font-family="'Courier New', monospace" font-size="8" letter-spacing="1" fill="#666">SPECIALTY</text>
-  ` : `
-    <text x="${INNER_X + INNER_W / 2}" y="${HALF_Y + 88}" text-anchor="middle"
-      font-family="'Courier New', monospace" font-size="8" letter-spacing="1" fill="#333">SPECIALTY: —</text>
-  `}
+  ` : ''}
 
   <!-- Action text -->
   ${action.trim() ? `
