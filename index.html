@@ -307,6 +307,7 @@
     <button class="tab active" data-template="crew">Crew</button>
     <button class="tab" data-template="gear">Gear</button>
     <button class="tab" data-template="cmnd">CMND</button>
+    <button class="tab" data-template="rule">Rule</button>
   </div>
 </header>
 
@@ -349,7 +350,7 @@
 
         <div class="section-label">Description</div>
         <div class="field-group">
-          <textarea id="crew-desc" placeholder="Card description or flavor text..."></textarea>
+          <textarea id="crew-desc" placeholder="Flavor text... **bold** for emphasis, Enter for new line."></textarea>
         </div>
 
       </div>
@@ -406,7 +407,27 @@
 
         <div class="section-label">Text</div>
         <div class="field-group">
-          <textarea id="cmnd-text" placeholder="Rules text..." style="min-height:120px;"></textarea>
+          <textarea id="cmnd-text" placeholder="Rules text... **bold** for emphasis, Enter for new line." style="min-height:120px;"></textarea>
+        </div>
+
+      </div>
+
+      <!-- RULE fields -->
+      <div class="template-fields" id="fields-rule">
+
+        <div class="field-group">
+          <label>Title</label>
+          <input type="text" id="rule-name" maxlength="24" placeholder="SUPPRESSING FIRE" value="SUPPRESSING FIRE">
+        </div>
+
+        <div class="section-label">Specialty</div>
+        <div class="spec-slots" id="rule-spec-slot">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="section-label">Text</div>
+        <div class="field-group">
+          <textarea id="rule-text" placeholder="Rule text..." style="min-height:120px;"></textarea>
         </div>
 
       </div>
@@ -473,7 +494,7 @@ function combatIcon(color) {
 function influenceIcon(color) {
   // Person head outline
   return `<svg width="28" height="28" viewBox="0 0 28 28">
-    <path d="M14 17.8182C18.5103 17.8182 22.1667 13.8294 22.1667 8.90909C22.1667 3.98874 18.5103 0 14 0C9.48967 0 5.83333 3.98874 5.83333 8.90909C5.83333 13.8294 9.48967 17.8182 14 17.8182Z" fill="#7D3C98"/>
+    <path d="M14 17.8182C18.5103 17.8182 22.1667 13.8294 22.1667 8.90909C22.1667 3.98874 18.5103 0 14 0C9.48967 0 5.83333 3.98874 5.83333 8.90909C5.83333 13.8294 9.48967 17.8182 14 17.8182Z" fill="${color}"/>
     <path d="M0 28C0 16.1212 28 16.1212 28 28H0Z" fill="${color}"/>
   </svg>`;
 }
@@ -497,7 +518,7 @@ function medicineIcon(color) {
 function scienceIcon(color) {
   // Question mark
   return `<svg width="28" height="28" viewBox="0 0 28 28">
-    <path d="M7 5.57143C7 1.28571 19 -0.142857 19 7C19 11.2857 13 11.2857 13 17" stroke="${color}" stroke-width="4" stroke-linecap="square"/>
+    <path d="M7 5.57143C7 1.28571 19 -0.142857 19 7C19 11.2857 13 11.2857 13 17" stroke="${color}" stroke-width="4" stroke-linecap="square" fill="none"/>
     <path d="M11 21H15V25H11V21Z" fill="${color}"/>
   </svg>`;
 }
@@ -545,6 +566,11 @@ const state = {
   cmnd: {
     name: 'OPEN FIRE',
     req1: 'combat', req2: 'none',
+    text: ''
+  },
+  rule: {
+    name: 'SUPPRESSING FIRE',
+    spec: 'combat',
     text: ''
   }
 };
@@ -629,6 +655,17 @@ function updateCmndReqSlots() {
   container.appendChild(buildSpecPicker('cmnd-req2', state.cmnd.req2, v => { state.cmnd.req2 = v; }));
 }
 
+// ─── Rule specialty slot ──────────────────────────────────────────────────────
+
+function updateRuleSpecSlot() {
+  const container = document.getElementById('rule-spec-slot');
+  container.innerHTML = '';
+  container.appendChild(buildSpecPicker('rule-spec', state.rule.spec, v => {
+    state.rule.spec = v;
+    renderCard();
+  }));
+}
+
 // ─── Gear specialty bonus slot ────────────────────────────────────────────────
 
 function updateGearSpecSlot() {
@@ -652,30 +689,59 @@ function specColor(key) {
   return SPECS[key] ? SPECS[key].color : '#333';
 }
 
-function specSymbolSVG(key, x, y, size = 32) {
+function specSymbolSVG(key, x, y, size = 32, colorOverride = null) {
   const spec = SPECS[key];
   if (!spec || key === 'none') return '';
   const half = size / 2;
   return `<g transform="translate(${x - half}, ${y - half}) scale(${size / 28})">
-    ${spec.icon(spec.color)}
+    ${spec.icon(colorOverride || spec.color)}
   </g>`;
 }
 
-function wrapText(text, maxChars, maxLines) {
-  const words = text.split(' ');
+function escSVG(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Wraps markdown text into lines, respecting explicit \n and **bold** markers.
+// Returns array of strings (markdown preserved) — use renderInline() to draw them.
+function wrapMarkdown(text, maxChars, maxLines) {
   const lines = [];
-  let line = '';
-  for (const w of words) {
-    if ((line + ' ' + w).trim().length > maxChars) {
-      if (line) lines.push(line.trim());
-      line = w;
-    } else {
-      line = (line + ' ' + w).trim();
-    }
+  const paragraphs = text.split('\n');
+  for (const para of paragraphs) {
     if (lines.length >= maxLines) break;
+    if (para.trim() === '') { lines.push(''); continue; } // blank spacer
+    const words = para.split(' ');
+    let lineWords = [], lineLen = 0;
+    for (const word of words) {
+      if (lines.length >= maxLines) break;
+      const plain = word.replace(/\*\*/g, '');
+      const addLen = lineLen === 0 ? plain.length : plain.length + 1;
+      if (lineLen + addLen > maxChars && lineWords.length > 0) {
+        lines.push(lineWords.join(' '));
+        lineWords = [word];
+        lineLen = plain.length;
+      } else {
+        lineWords.push(word);
+        lineLen += addLen;
+      }
+    }
+    if (lineWords.length > 0 && lines.length < maxLines) lines.push(lineWords.join(' '));
   }
-  if (line && lines.length < maxLines) lines.push(line.trim());
   return lines;
+}
+
+// Renders a single line with inline **bold** support as an SVG <text> element.
+function renderInline(lineText, x, y, fontSize, fill) {
+  if (lineText === '') return ''; // blank spacer line — no element
+  const re = /\*\*(.*?)\*\*/g;
+  let inner = '', last = 0, m;
+  while ((m = re.exec(lineText)) !== null) {
+    if (m.index > last) inner += `<tspan>${escSVG(lineText.slice(last, m.index))}</tspan>`;
+    inner += `<tspan font-weight="bold">${escSVG(m[1])}</tspan>`;
+    last = m.index + m[0].length;
+  }
+  if (last < lineText.length) inner += `<tspan>${escSVG(lineText.slice(last))}</tspan>`;
+  return `<text x="${x}" y="${y}" font-family="'Courier New', monospace" font-size="${fontSize}" fill="${fill}">${inner}</text>`;
 }
 
 function renderCrewCard() {
@@ -725,7 +791,7 @@ function renderCrewCard() {
   const spec2X = INNER_X + INNER_W - 8 - 14;          // center of rightmost icon
   const spec1X = spec2X - 34;                           // center of left icon (gap of 6px)
 
-  const descLines = wrapText(desc, 30, 5);
+  const descLines = wrapMarkdown(desc, 34, 6);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}">
   <!-- Border -->
@@ -771,10 +837,8 @@ function renderCrewCard() {
     font-family="'Courier New', monospace" font-size="26" font-weight="bold" fill="#e8e8e8">${utility}</text>
 
   <!-- Description -->
-  ${descLines.map((line, i) => `
-    <text x="${INNER_X + 8}" y="${DESC_Y + 12 + i * 14}"
-      font-family="'Courier New', monospace" font-size="9" fill="#888">${line}</text>
-  `).join('')}
+  <rect x="${INNER_X}" y="${DESC_Y}" width="${INNER_W}" height="${INNER_Y + INNER_H - DESC_Y}" fill="#111"/>
+  ${descLines.map((line, i) => renderInline(line, INNER_X + 8, DESC_Y + 13 + i * 14, 9, '#888')).join('')}
 </svg>`;
 }
 
@@ -789,7 +853,7 @@ function renderGearCard() {
   // Gear: top half is the "hidden" zone, bottom half is visible when under CREW
   const HALF_Y = INNER_Y + INNER_H / 2;
 
-  const descLines = wrapText(action, 30, 4);
+  const descLines = wrapMarkdown(action, 34, 5);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}">
   <!-- Neutral border -->
@@ -842,11 +906,8 @@ function renderGearCard() {
 
   <!-- Action text -->
   ${action.trim() ? `
-    <rect x="${INNER_X + 4}" y="${HALF_Y + 98}" width="${INNER_W - 8}" height="${INNER_Y + INNER_H - (HALF_Y + 102)}" fill="#111"/>
-    ${descLines.map((line, i) => `
-      <text x="${INNER_X + 12}" y="${HALF_Y + 112 + i * 14}"
-        font-family="'Courier New', monospace" font-size="9" fill="#888">${line}</text>
-    `).join('')}
+    <rect x="${INNER_X}" y="${HALF_Y + 98}" width="${INNER_W}" height="${INNER_Y + INNER_H - (HALF_Y + 98)}" fill="#111"/>
+    ${descLines.map((line, i) => renderInline(line, INNER_X + 8, HALF_Y + 112 + i * 14, 9, '#888')).join('')}
   ` : ''}
 </svg>`;
 }
@@ -885,7 +946,7 @@ function renderCmndCard() {
 
   // Requirement symbols
   const reqSyms = [req1, req2].filter(r => r !== 'none');
-  const textLines = wrapText(text, 28, 12);
+  const textLines = wrapMarkdown(text, 34, 14);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}">
   ${bgFill}
@@ -907,10 +968,57 @@ function renderCmndCard() {
 
   <!-- Text box -->
   <rect x="${INNER_X + 8}" y="${INNER_Y + 82}" width="${INNER_W - 16}" height="${INNER_H - 90}" fill="#111"/>
-  ${textLines.map((line, i) => `
-    <text x="${INNER_X + 16}" y="${INNER_Y + 98 + i * 15}"
-      font-family="'Courier New', monospace" font-size="10" fill="#ccc">${line}</text>
-  `).join('')}
+  ${textLines.map((line, i) => renderInline(line, INNER_X + 8, INNER_Y + 98 + i * 15, 10, '#ccc')).join('')}
+</svg>`;
+}
+
+function renderRuleCard() {
+  const { name, spec, text } = state.rule;
+  const hasSpec = spec !== 'none';
+  const specObj = hasSpec ? SPECS[spec] : null;
+
+  const BORDER = 12;
+  const INNER_X = BORDER;
+  const INNER_Y = BORDER;
+  const INNER_W = CARD_W - BORDER * 2;
+  const INNER_H = CARD_H - BORDER * 2;
+  const CX = INNER_X + INNER_W / 2;
+
+  const NAME_H = 28;
+  const SPEC_BOX_H = 56;
+  const SPEC_Y = INNER_Y + NAME_H;
+  const TEXT_Y = SPEC_Y + SPEC_BOX_H;
+
+  const textLines = wrapMarkdown(text, 34, 16);
+
+  // Background: plain dark, no diagonal — single specialty defines the accent
+  const specColor = hasSpec ? specObj.color : '#2a2a2a';
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}">
+  <!-- Background -->
+  <rect width="${CARD_W}" height="${CARD_H}" fill="#1a1a1a"/>
+
+  <!-- Name bar -->
+  <rect x="${INNER_X}" y="${INNER_Y}" width="${INNER_W}" height="${NAME_H}" fill="#111"/>
+  <text x="${CX}" y="${INNER_Y + 19}" text-anchor="middle"
+    font-family="'Courier New', monospace" font-size="15" font-weight="bold"
+    letter-spacing="3" fill="#e8e8e8">${name.toUpperCase()}</text>
+
+  <!-- Specialty block -->
+  <rect x="${INNER_X}" y="${SPEC_Y}" width="${INNER_W}" height="${SPEC_BOX_H}" fill="${specColor}"/>
+  ${hasSpec ? `
+    ${specSymbolSVG(spec, CX - 50, SPEC_Y + SPEC_BOX_H / 2, 32, '#fff')}
+    <text x="${CX - 26}" y="${SPEC_Y + SPEC_BOX_H / 2 + 6}"
+      font-family="'Courier New', monospace" font-size="16" font-weight="bold"
+      letter-spacing="3" fill="#fff">${specObj.name.toUpperCase()}</text>
+  ` : `
+    <text x="${CX}" y="${SPEC_Y + SPEC_BOX_H / 2 + 6}" text-anchor="middle"
+      font-family="'Courier New', monospace" font-size="11" letter-spacing="2" fill="#444"></text>
+  `}
+
+  <!-- Text box -->
+  <rect x="${INNER_X}" y="${TEXT_Y}" width="${INNER_W}" height="${INNER_Y + INNER_H - TEXT_Y}" fill="#111"/>
+  ${textLines.map((line, i) => renderInline(line, INNER_X + 8, TEXT_Y + 14 + i * 15, 10, '#ccc')).join('')}
 </svg>`;
 }
 
@@ -920,6 +1028,7 @@ function renderCard() {
     case 'crew': container.innerHTML = renderCrewCard(); break;
     case 'gear': container.innerHTML = renderGearCard(); break;
     case 'cmnd': container.innerHTML = renderCmndCard(); break;
+    case 'rule': container.innerHTML = renderRuleCard(); break;
   }
 }
 
@@ -973,6 +1082,10 @@ bindInput('gear-action', 'gear.action');
 bindInput('cmnd-name', 'cmnd.name');
 bindInput('cmnd-text', 'cmnd.text');
 
+// RULE
+bindInput('rule-name', 'rule.name');
+bindInput('rule-text', 'rule.text');
+
 // ─── Export ───────────────────────────────────────────────────────────────────
 
 document.getElementById('download-btn').addEventListener('click', async () => {
@@ -1020,6 +1133,7 @@ function triggerDownload(url, filename) {
 updateCrewSpecSlots();
 updateCmndReqSlots();
 updateGearSpecSlot();
+updateRuleSpecSlot();
 renderCard();
 </script>
 </body>

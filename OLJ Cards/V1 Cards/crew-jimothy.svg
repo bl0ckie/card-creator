@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="252" height="352" viewBox="0 0 252 352">
+  <!-- Border -->
+  <rect width="252" height="352" fill="#2a2a2a"/>
+  <!-- Card body -->
+  <rect x="12" y="12" width="228" height="328" fill="#1a1a1a"/>
+
+  <!-- Name bar -->
+  <rect x="12" y="12" width="228" height="28" fill="#111"/>
+  <text x="126" y="31" text-anchor="middle" font-family="'Courier New', monospace" font-size="15" font-weight="bold" letter-spacing="3" fill="#e8e8e8">JIMOTHY</text>
+
+  <!-- Rank strip + spec icons on right -->
+  <text x="20" y="62" font-family="'Courier New', monospace" font-size="9" font-weight="bold" letter-spacing="2" fill="#3a3a3a">GRUNT</text>
+  
+
+  <!-- Art area (transparent) -->
+  <rect x="12" y="76" width="228" height="138" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="126" y="149" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#2a2a2a" letter-spacing="1">ART</text>
+
+  <!-- Stats -->
+  <rect x="12" y="220" width="112" height="48" fill="#111"/>
+  <rect x="128" y="220" width="112" height="48" fill="#111"/>
+
+  <text x="69" y="232" text-anchor="middle" font-family="'Courier New', monospace" font-size="8" letter-spacing="1" fill="#666">WOUNDS</text>
+  <text x="69" y="256" text-anchor="middle" font-family="'Courier New', monospace" font-size="26" font-weight="bold" fill="#e8e8e8">1</text>
+
+  <text x="183" y="232" text-anchor="middle" font-family="'Courier New', monospace" font-size="8" letter-spacing="1" fill="#666">UTILITY</text>
+  <text x="183" y="256" text-anchor="middle" font-family="'Courier New', monospace" font-size="26" font-weight="bold" fill="#e8e8e8">3</text>
+
+  <!-- Description -->
+  
+    <text x="20" y="286" font-family="'Courier New', monospace" font-size="9" fill="#888">Jimothy lives to haul gear and</text>
+  
+    <text x="20" y="300" font-family="'Courier New', monospace" font-size="9" fill="#888">cleanup after the 'heroes'.</text>
+  
+</svg>

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="252" height="352" viewBox="0 0 252 352">
+  <!-- Border -->
+  
+      <rect width="252" height="352" fill="#b03a2e"/>
+      <polygon points="0,0 252,0 0,352" fill="#8d6e35"/>
+    
+  <!-- Card body -->
+  <rect x="12" y="12" width="228" height="328" fill="#1a1a1a"/>
+
+  <!-- Name bar -->
+  <rect x="12" y="12" width="228" height="28" fill="#111"/>
+  <text x="126" y="31" text-anchor="middle" font-family="'Courier New', monospace" font-size="15" font-weight="bold" letter-spacing="3" fill="#e8e8e8">CPT. DE LANCY</text>
+
+  <!-- Rank strip + spec icons on right -->
+  <text x="20" y="62" font-family="'Courier New', monospace" font-size="9" font-weight="bold" letter-spacing="2" fill="#8d6e35">SPECIALIST</text>
+  
+    
+      <g transform="translate(171, 45) scale(0.9285714285714286)">
+    <svg width="28" height="28" viewBox="0 0 28 28">
+    <rect x="11" y="21" width="4" height="4" fill="#8d6e35"/>
+    <rect x="11" width="4" height="19" fill="#8d6e35"/>
+  </svg>
+  </g>
+      <g transform="translate(205, 45) scale(0.9285714285714286)">
+    <svg width="28" height="28" viewBox="0 0 28 28">
+    <path d="M7.22084 16.0952H19.8833V26H7.22084V16.0952Z" fill="#b03a2e"/>
+    <path d="M3.70348 9.90475L10.7382 10.5238L11.4417 8.04761H21.9937L20.5868 15.4762H6.51736L3.70348 9.90475Z" fill="#b03a2e"/>
+    <path d="M3.70347 5.57144L11.4417 6.19049L10.3161 9.90477L3 9.28573L3.70347 5.57144Z" fill="#b03a2e"/>
+    <path d="M4.40694 0.619049H8.62777V5.2619L4.40694 4.95238V0.619049Z" fill="#b03a2e"/>
+    <path d="M18.8281 1.2381H22.3455V7.42857H18.8281V1.2381Z" fill="#b03a2e"/>
+    <path d="M14.2556 0.619049H18.1246V7.42857H14.2556V0.619049Z" fill="#b03a2e"/>
+    <path d="M9.33124 0H13.5521V7.42857H11.723L12.1451 5.57143L9.33124 5.2619V0Z" fill="#b03a2e"/>
+  </svg>
+  </g>
+    
+  
+
+  <!-- Art area (transparent) -->
+  <rect x="12" y="76" width="228" height="138" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+  <text x="126" y="149" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#2a2a2a" letter-spacing="1">ART</text>
+
+  <!-- Stats -->
+  <rect x="12" y="220" width="112" height="48" fill="#111"/>
+  <rect x="128" y="220" width="112" height="48" fill="#111"/>
+
+  <text x="69" y="232" text-anchor="middle" font-family="'Courier New', monospace" font-size="8" letter-spacing="1" fill="#666">WOUNDS</text>
+  <text x="69" y="256" text-anchor="middle" font-family="'Courier New', monospace" font-size="26" font-weight="bold" fill="#e8e8e8">2</text>
+
+  <text x="183" y="232" text-anchor="middle" font-family="'Courier New', monospace" font-size="8" letter-spacing="1" fill="#666">UTILITY</text>
+  <text x="183" y="256" text-anchor="middle" font-family="'Courier New', monospace" font-size="26" font-weight="bold" fill="#e8e8e8">1</text>
+
+  <!-- Description -->
+  <rect x="12" y="274" width="228" height="66" fill="#111"/>
+  
+    <text x="20" y="287" font-family="'Courier New', monospace" font-size="9" fill="#888">Got your back: If a friendly a a crew</text>
+  
+    <text x="20" y="301" font-family="'Courier New', monospace" font-size="9" fill="#888">in the same room takes a wound, De</text>
+  
+    <text x="20" y="315" font-family="'Courier New', monospace" font-size="9" fill="#888">Lancy may make a combat roll against</text>
+  
+    <text x="20" y="329" font-family="'Courier New', monospace" font-size="9" fill="#888">the opponent attacking crew.</text>
+  
+</svg>
